@@ -3,16 +3,19 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/E:/xampp/htdocs/languageChat/protected/views/users/create.php</file>
+            <file>file:/E:/xampp/htdocs/languageChat/css/languageChat.css</file>
             <file>file:/E:/xampp/htdocs/languageChat/protected/components/UserIdentity.php</file>
             <file>file:/E:/xampp/htdocs/languageChat/protected/controllers/UsersController.php</file>
-            <file>file:/E:/xampp/htdocs/languageChat/protected/controllers/SiteController.php</file>
-            <file>file:/E:/xampp/htdocs/languageChat/protected/views/site/chat.php</file>
-            <file>file:/E:/xampp/htdocs/languageChat/protected/views/layouts/main.php</file>
             <file>file:/E:/xampp/htdocs/languageChat/protected/views/site/login.php</file>
             <file>file:/E:/xampp/htdocs/languageChat/protected/models/Users.php</file>
             <file>file:/E:/xampp/htdocs/languageChat/protected/models/LoginForm.php</file>
             <file>file:/E:/xampp/htdocs/languageChat/protected/views/users/_form.php</file>
+            <file>file:/E:/xampp/htdocs/languageChat/protected/views/users/create.php</file>
+            <file>file:/E:/xampp/htdocs/languageChat/js/chat.js</file>
+            <file>file:/E:/xampp/htdocs/languageChat/js/nodeServer.js</file>
+            <file>file:/E:/xampp/htdocs/languageChat/protected/controllers/SiteController.php</file>
+            <file>file:/E:/xampp/htdocs/languageChat/protected/views/layouts/main.php</file>
+            <file>file:/E:/xampp/htdocs/languageChat/protected/views/site/chat.php</file>
         </group>
     </open-files>
 </project-private>

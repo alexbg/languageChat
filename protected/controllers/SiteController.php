@@ -36,7 +36,7 @@ class SiteController extends Controller
 				'users'=>array('*'),
 			),
 			array('allow', // allow authenticated user to perform 'create' and 'update' actions
-				'actions'=>array('chat','logout'),
+				'actions'=>array('chat','logout','getGrid'),
 				'users'=>array('@'),
 			),
 			array('deny',  // deny all users
@@ -98,8 +98,41 @@ class SiteController extends Controller
         
         public function actionChat(){
             
+            $baseUrl = Yii::app()->baseUrl;
+            
+            $cs = Yii::app()->getClientScript();
+            
+            $cs->registerScriptFile($baseUrl.'/js/chat.js');
+            $cs->registerScriptFile('http://192.168.1.33:3000/socket.io/socket.io.js',CClientScript::POS_END);
+                /*if(!$cs->isScriptFileRegistered('http://192.168.1.33:3000/socket.io/socket.io.js')){
+                    Yii::app()->user->setFlash('error','El chat no esta disponible en estos momentos');
+                }*/
             $this->render('chat');
             
+        }
+        
+        public function actionGetGrid(){
+            
+            $prueba;
+            $class;
+            foreach($_POST as $key=>$value){
+                if($key!='total'){
+                    $prueba[] = $value;
+                    $class[] = $key;
+                }
+                
+            }
+            //echo var_dump($prueba);
+            $dataProvider = new CArrayDataProvider($prueba,array(
+                    'keyField'=>false
+                ));
+            $this->widget('zii.widgets.grid.CGridView', array(
+                'id'=>'list-users',
+                'dataProvider'=>$dataProvider,
+                'rowCssClass'=>$class,
+            ));
+            //echo var_dump($class);
+            //return $prueba;
         }
 
 	/**

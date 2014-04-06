@@ -15,7 +15,7 @@
         
         <script src="js/vendor/modernizr.js"></script>
         
-        
+        <link rel="stylesheet" href="css/languageChat.css">
 	<title><?php echo CHtml::encode($this->pageTitle); ?></title>
 </head>
 
@@ -87,6 +87,14 @@
 			'links'=>$this->breadcrumbs,
 		)); ?><!-- breadcrumbs -->
 	<?php endif?>
+        
+        
+        <div data-alert id="js-alert"></div>
+                
+        <!--<div data-alert class="alert-box warning">
+            <?php //echo Yii::app()->user->getFlash('error'); ?>
+            <a href="#" class="close">&times;</a>
+        </div>-->
                 
         <main class="small-11 small-centered columns">
             <?php echo $content; ?>
@@ -105,7 +113,7 @@
 <?php Yii::app()->clientScript->registerCoreScript('jquery'); ?>
 <script src="js/foundation.min.js"></script>
 <script src="js/vendor/fastclick.js"></script>
-<!--<script src="js/jquery.cookie.js"></script>-->
+<script src="js/jquery.cookie.js"></script>
 <script>
   $(document).foundation();
 </script>

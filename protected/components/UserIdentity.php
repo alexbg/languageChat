@@ -20,6 +20,9 @@ class UserIdentity extends CUserIdentity
             {
                 $this->_id=$record->id;
                 $this->setState('username', $record->username);
+                Yii::app()->request->cookies['username'] = new CHttpCookie('username',$record->username);
+                Yii::app()->request->cookies['native'] = new CHttpCookie('native',$record->native_language);
+                Yii::app()->request->cookies['foreign'] = new CHttpCookie('foreign',$record->foreign_language);
                 $this->errorCode=self::ERROR_NONE;
             }  
             return !$this->errorCode;

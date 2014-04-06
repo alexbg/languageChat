@@ -3,9 +3,18 @@
     <div class="small-12 medium-6 column">
         <dl class="accordion" data-accordion>
           <dd>
-            <a href="#panel1">Users online</a>
-            <div id="panel1" class="content active">
-                ESSSSSTO es aparcar
+            <a href="#users">Users online: <span id="total"></span></a>
+            <div id="users" class="content active">
+                <?php /*$this->widget('zii.widgets.grid.CGridView', array(
+                        'dataProvider' => new CArrayDataProvider('Users'),
+                        'columns' => array(
+                         //specify the colums you wanted here
+                        ),
+                    ));*/
+                
+                $rawData=Yii::app()->db->createCommand('SELECT * FROM users')->queryAll();
+                echo var_dump($rawData);
+                ?>
             </div>
           </dd>
           <dd>
