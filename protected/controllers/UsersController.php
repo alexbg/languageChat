@@ -55,6 +55,7 @@ class UsersController extends Controller
 		if(isset($_POST['Users']))
 		{
 			$model->attributes=$_POST['Users'];
+                        $model->online = 0;
                         
                         if($model->password != ''){
                             $model->password = CPasswordHelper::hashPassword($model->password);

@@ -18,12 +18,20 @@ class UserIdentity extends CUserIdentity
                 $this->errorCode=self::ERROR_PASSWORD_INVALID;
             else
             {
-                $this->_id=$record->id;
-                $this->setState('username', $record->username);
-                Yii::app()->request->cookies['username'] = new CHttpCookie('username',$record->username);
-                Yii::app()->request->cookies['native'] = new CHttpCookie('native',$record->native_language);
-                Yii::app()->request->cookies['foreign'] = new CHttpCookie('foreign',$record->foreign_language);
-                $this->errorCode=self::ERROR_NONE;
+                $record->online = 0;
+                if($record->save()){
+                    $this->_id=$record->id;
+                    $this->setState('username', $record->username);
+                    $this->setState('id', $record->id);
+                    Yii::app()->request->cookies['username'] = new CHttpCookie('username',$record->username);
+                    Yii::app()->request->cookies['native'] = new CHttpCookie('native',$record->native_language);
+                    Yii::app()->request->cookies['foreign'] = new CHttpCookie('foreign',$record->foreign_language);
+                    Yii::app()->request->cookies['start'] = new CHttpCookie('start',true);
+                    $this->errorCode=self::ERROR_NONE;
+                }
+                else{
+                    $this->errorCode=self::ERROR_PASSWORD_INVALID;
+                }
             }  
             return !$this->errorCode;
         }

@@ -3,17 +3,34 @@
     <div class="small-12 medium-6 column">
         <dl class="accordion" data-accordion>
           <dd>
-            <a href="#users">Users online: <span id="total"></span></a>
+            <a href="#users">Users online: <span id="total"><?php echo $total; ?></span></a>
             <div id="users" class="content active">
-                <?php /*$this->widget('zii.widgets.grid.CGridView', array(
-                        'dataProvider' => new CArrayDataProvider('Users'),
-                        'columns' => array(
-                         //specify the colums you wanted here
-                        ),
-                    ));*/
-                
-                $rawData=Yii::app()->db->createCommand('SELECT * FROM users')->queryAll();
-                echo var_dump($rawData);
+               <?php 
+                    /*$this->widget('zii.widgets.grid.CGridView', array(
+                    'id'=>'list-users',
+                    'dataProvider'=>$dataProvider,
+                    'ajaxUrl'=>Yii::app()->createUrl('site/getGrid'),    
+                    'columns'=>array(
+                        'username',
+                        'native_language',
+                        'foreign_language',
+
+                       array(
+                        'class'=>'CButtonColumn',
+                        'header'=>'Buttons',
+                        'template' => '{profile} {private}',   
+                        'buttons'=>array(
+                            'profile'=>array(
+                                'label'=>'show profile',
+                                'url'=>''
+                                ),
+                            'private'=>array(
+                                'label'=>'start chat'
+                                )
+                            ),
+                        )
+                    )
+                ));*/
                 ?>
             </div>
           </dd>

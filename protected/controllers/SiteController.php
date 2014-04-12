@@ -98,41 +98,80 @@ class SiteController extends Controller
         
         public function actionChat(){
             
-            $baseUrl = Yii::app()->baseUrl;
-            
-            $cs = Yii::app()->getClientScript();
-            
-            $cs->registerScriptFile($baseUrl.'/js/chat.js');
-            $cs->registerScriptFile('http://192.168.1.33:3000/socket.io/socket.io.js',CClientScript::POS_END);
-                /*if(!$cs->isScriptFileRegistered('http://192.168.1.33:3000/socket.io/socket.io.js')){
-                    Yii::app()->user->setFlash('error','El chat no esta disponible en estos momentos');
-                }*/
-            $this->render('chat');
-            
-        }
-        
-        public function actionGetGrid(){
-            
-            $prueba;
+            /*$prueba;
             $class;
+            
             foreach($_POST as $key=>$value){
                 if($key!='total'){
                     $prueba[] = $value;
                     $class[] = $key;
                 }
                 
+            }*/
+            //echo var_dump($prueba);
+            /*$dataProvider = new CArrayDataProvider($prueba,array(
+                    'keyField'=>false
+                ));*/
+            // USAR EL server.sockets.clients() PARA GENERAR UN ARRAY Y 
+            // PASARLE SIEMPRE EL ARRAY AL COMPLETO AL GRID PARA QUE
+            // COMPRUEBE QUE HA CAMBIADO
+            // 
+            $user = Users::model()->findByPk(Yii::app()->user->id);
+            $user->online = 1;
+            if($user->save()){
+                
+                $dataProvider = new CActiveDataProvider('Users',array(
+                    'criteria'=>array(
+                        'condition'=>'online=true'
+                        )
+                    )
+                );
+                
+                $total = Users::model()->count('online=1');
+                
+            }
+
+            /*$total = Users::model()->count('online=1');
+            }
+            
+            $dataProvider = new CActiveDataProvider('Users',array(
+                'criteria'=>array(
+                    'condition'=>'online=true'
+                )
+            ));
+            
+            $total = Users::model()->count('online=1');*/
+            
+            
+            $this->render('chat',array('dataProvider'=>$dataProvider,'total'=>$total));
+            
+        }
+        
+        public function actionGetGrid(){
+            
+            $users = Array();
+            $class;
+            
+            foreach($_POST as $key=>$value){
+                if($key!='total'){
+                    $users[] = $value;
+                    $class[] = $key;
+                }
+                
             }
             //echo var_dump($prueba);
-            $dataProvider = new CArrayDataProvider($prueba,array(
+            $dataProvider = new CArrayDataProvider($users,array(
                     'keyField'=>false
                 ));
-            $this->widget('zii.widgets.grid.CGridView', array(
-                'id'=>'list-users',
-                'dataProvider'=>$dataProvider,
-                'rowCssClass'=>$class,
-            ));
-            //echo var_dump($class);
-            //return $prueba;
+            
+            /*$dataProvider = new CActiveDataProvider('Users',array(
+                'criteria'=>array(
+                    'condition'=>'online=true'
+                )
+            ));*/
+            //echo var_dump($prueba);
+            $this->renderPartial('chatGrid',array('dataProvider'=>$dataProvider));
+            
         }
 
 	/**
@@ -155,8 +194,10 @@ class SiteController extends Controller
 			$model->attributes=$_POST['LoginForm'];
                         //$model->password = CPasswordHelper::hashPassword($model->password); 
 			// validate user input and redirect to the previous page if valid
-			if($model->validate() && $model->login())
-				$this->redirect(Yii::app()->user->returnUrl);
+			if($model->validate() && $model->login()){
+                                
+				$this->redirect(Yii::app()->user->returnUrl,array('login'=>true));
+                        }
 		}
 		// display the login form
 		$this->render('login',array('model'=>$model));
@@ -167,7 +208,13 @@ class SiteController extends Controller
 	 */
 	public function actionLogout()
 	{
-		Yii::app()->user->logout();
+                $user = Users::model()->findByPk(Yii::app()->user->id);
+                $user->online = 0;
+                if($user->save()){
+                    Yii::app()->user->logout();
+                    Yii::app()->request->cookies->clear();
+                }
+		//Yii::app()->user->logout();
 		$this->redirect(Yii::app()->homeUrl);
 	}
 }

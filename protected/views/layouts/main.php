@@ -114,6 +114,22 @@
 <script src="js/foundation.min.js"></script>
 <script src="js/vendor/fastclick.js"></script>
 <script src="js/jquery.cookie.js"></script>
+<?php
+//echo Yii::app()->request->cookies['start'];
+
+if(!Yii::app()->user->isGuest){
+    $baseUrl = Yii::app()->baseUrl;
+
+    $cs = Yii::app()->getClientScript();
+
+    $cs->registerScriptFile($baseUrl.'/js/chat.js');
+    $cs->registerScriptFile('http://192.168.1.33:3000/socket.io/socket.io.js',CClientScript::POS_END);
+}
+
+/*if(!isset($login) AND isset(Yii::app()->request->cookies['start'])){
+    unset(Yii::app()->request->cookies['start']);
+}*/
+?>
 <script>
   $(document).foundation();
 </script>

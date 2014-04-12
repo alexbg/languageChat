@@ -1,74 +1,74 @@
 $( document ).ready(function() {
     // obtengo la ip del usuario y la guardo en la cookie ip
-    
+    var error;
+    var login = false;
     try{
-        var client = io.connect('http://192.168.1.33:3000');
+        var client = io.connect('http://192.168.1.33:3000?user='+$.cookie('username')+'&native='+$.cookie('native'));
+        error = false;
     }
     catch(err){
-        message($('#js-alert'),'Hay un error en la conexion','warning');
+        //message($('#js-alert'),'El chat no esta disponible porque hay un error de conexion','warning');
+        error = true;
         
     }
-    var user = setInfoUser();
+    //var user = setInfoUser();
     
     if(client != null){
     
-        // evento que se ejecutara cuando el servidor, le pida saber quien es
-        client.on('who',function(){
-           
-           client.emit('user',user);
-           
-        });
-
-        // muestra el mensaje de bienvenida
-        client.on('welcome',function(text){
-            message($('#js-alert'),text,'success');
-        });
+       // si existe la cookie start, significa que se acaba de loguear
+       // por eso envio el mensaje de login y cambioa la cookie a false
+       console.log($.cookie('start'));
+        if($.cookie('start') == true){
+            //alert('loginnn');
+            client.emit('login');
+            $.cookie('start',false,{ path: '/' });
+        }
         
-        // obtiene la informacion de todos los usuarios
-        client.on('users',function(users){
+        client.on('who',function(){
+            var user = setInfoUser();
+            //alert('whooo')
+            client.emit('dni',user);
             
-            // Hago una peticion post para obtener la tabla
+        }); 
+        
+        
+        // Actualizo la tabla con la nueva informacion
+        client.on('update',function(users){
+            console.log(users);
+            
             $.post('index.php?r=site/getGrid',users,function(data){
                 // muestro la tabla de los usuarios
                 $('#users').html(data);
                 $('.summary').remove();
+                var total = $('#total').html();
+                total++;
+                $('#total').html(total);
             });
             
-            $('#total').html(users['total']);
-        });
-        
-        // actualiza la informacion del cliente, este evento se ejecutara cuando
-        // algun usuario se desconecte o entre uno nuevo
-        client.on('update',function(info){
-            // cambia el numero de usuarios online
-            $('#total').html(info[0]);
-            // genera una nueva columna
-            // recuerda que cada columna tiene como class el id del socket
-            var column = $('.items').append(
-                            '<tr class='+info[2]+'>'+
-                            '<td>'+info[1]['username']+'</td>'+
-                            '<td>'+info[1]['native']+'</td>'+
-                            '<td>'+info[1]['foreign']+'</td>'+
-                            '</tr>'
-                            );
             
-        })
-        
-        // Elimina de la tabla el usuario desconectado
-        client.on('delete',function(info){
-            // cambia el numero de usuarios onlie
-            $('#total').html(info[0]);
-            // elimina mediante el id del socket la columna
-            $('.'+info[2]).remove();
-            console.log($('.'+info[2]));
+            //$.fn.yiiGridView.update('list-users');
+            
+            //alert('updateee');
         });
         
-        /// muestra un error si por algun motivo se pierde la conexion
+        client.on('delete',function(){
+            console.log('eliminando');
+            //$.fn.yiiGridView.update('list-users');
+            var total = $('#total').html();
+            total--;
+            $('#total').html(total);
+            //alert('updateee');
+        });
+        
+        
+        
         client.on('error',function(){
             message($('#js-alert'),'Se ha desconectado','info');
             $('#total').html(0);
             $('.items').html('');
         });
+        
+       
     }
     
     /**
@@ -94,7 +94,7 @@ $( document ).ready(function() {
                 break;
         };
         element.show(500).delay(3000).hide(500);
-    };
+    }
     
     // preparo el objeto del usuario
     function setInfoUser(){
@@ -104,7 +104,17 @@ $( document ).ready(function() {
         user['foreign'] = $.cookie('foreign');
         return user;
     }
+                    
+    function error(){
+        if(error){
+            message($('#js-alert'),'El chat no esta disponible','info'); 
+        }
+    }
     
+    function login(){
+        login = true;
+    }
+     
 });
 
 

@@ -11,6 +11,7 @@
  * @property string $native_language
  * @property string $foreign_language
  * @property string $descripcion
+ * @property integer $online
  */
 class Users extends CActiveRecord
 {
@@ -30,7 +31,8 @@ class Users extends CActiveRecord
 		// NOTE: you should only define rules for those attributes that
 		// will receive user inputs.
 		return array(
-			array('email, password, username, native_language, foreign_language, descripcion', 'required'),
+			array('email, password, username, native_language, foreign_language, descripcion, online', 'required'),
+			array('online', 'numerical', 'integerOnly'=>true),
 			array('email, password, native_language, foreign_language', 'length', 'max'=>255),
 			array('username', 'length', 'max'=>60),
                         array('password','length','min'=>6),
@@ -38,7 +40,7 @@ class Users extends CActiveRecord
                         array('email, username','unique'),
 			// The following rule is used by search().
 			// @todo Please remove those attributes that should not be searched.
-			array('id, email, password, username, native_language, foreign_language, descripcion', 'safe', 'on'=>'search'),
+			array('id, email, password, username, native_language, foreign_language, descripcion, online', 'safe', 'on'=>'search'),
 		);
 	}
 
@@ -66,6 +68,7 @@ class Users extends CActiveRecord
 			'native_language' => 'Native Language',
 			'foreign_language' => 'Foreign Language',
 			'descripcion' => 'Descripcion',
+			'online' => 'Online',
 		);
 	}
 
@@ -94,6 +97,7 @@ class Users extends CActiveRecord
 		$criteria->compare('native_language',$this->native_language,true);
 		$criteria->compare('foreign_language',$this->foreign_language,true);
 		$criteria->compare('descripcion',$this->descripcion,true);
+		$criteria->compare('online',$this->online);
 
 		return new CActiveDataProvider($this, array(
 			'criteria'=>$criteria,
