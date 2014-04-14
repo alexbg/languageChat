@@ -3,7 +3,7 @@ $( document ).ready(function() {
     var error;
     var login = false;
     try{
-        var client = io.connect('http://192.168.1.33:3000?user='+$.cookie('username')+'&native='+$.cookie('native'));
+        var client = io.connect('http://192.168.1.33:3000?user='+$.cookie('username'));
         error = false;
     }
     catch(err){
@@ -34,31 +34,29 @@ $( document ).ready(function() {
         
         // Actualizo la tabla con la nueva informacion
         client.on('update',function(users){
-            console.log(users);
+            //console.log(users);
             
             $.post('index.php?r=site/getGrid',users,function(data){
                 // muestro la tabla de los usuarios
                 $('#users').html(data);
-                $('.summary').remove();
-                var total = $('#total').html();
-                total++;
-                $('#total').html(total);
+                //$('.summary').remove();
             });
-            
+            console.log(users.total);
+            $('#total').html(users.total);
             
             //$.fn.yiiGridView.update('list-users');
             
             //alert('updateee');
         });
         
-        client.on('delete',function(){
+        /*client.on('delete',function(){
             console.log('eliminando');
             //$.fn.yiiGridView.update('list-users');
             var total = $('#total').html();
             total--;
             $('#total').html(total);
             //alert('updateee');
-        });
+        });*/
         
         
         

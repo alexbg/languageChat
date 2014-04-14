@@ -85,23 +85,22 @@ server.sockets.on('connection',function(socket){
            // AADIR A CADA CLIENTE EL EL SERVER.SOCKETS.CLIENTS() EL USUARIO AL QUE PERTENECE
            // Y DE AHI OBTENER LA TABLA DE USUARIOS
             
-            
+            // ESTOS DATOS EN EL CLIENTE SE COJEN POR LAS COOKIES
             var user = {
                 'username':data['username'],
                 'native_language':data['native'],
                 'foreign_language':data['foreign'],
-                //'client':allClients[lastClient]['id'],
-                //'delete':false,
+                'connected':true,
             }
                     
             
             users[data['username']] = user
             
-            var allClients = server.sockets.clients();
-            var totalClient =  allClients.length - 1;
+            //var allClients = server.sockets.clients();
+            //var totalClient =  allClients.length - 1;
             
-            // Añado el usuario al cliente
-            allClients[totalClient]['user'] = user
+            // Añado el usuario al ultimo cliente
+            //allClients[totalClient]['user'] = user
             
             // Aumento + 1 los clientes conectado cuando un usuario NUEVO se ha 
             // conectado
@@ -113,6 +112,7 @@ server.sockets.on('connection',function(socket){
                 total = 1;
             }
             
+            users['total'] = total;
             
             server.sockets.emit('update',users);
            
@@ -120,17 +120,24 @@ server.sockets.on('connection',function(socket){
         else{
             //setTime(data['username']);
             socket.emit('update',users);
+            users[data['username']].connected = true;
+            console.log(users[data['username']]);
         }
    });
    
   
    
    socket.on('disconnect',function(){
-       console.log('DESCONECTADOOO');
-       
-       // Cuando un usuario se desconecta, iniciara este contador
-      setTime();
-      
+        console.log('DESCONECTADOOO');
+
+        // obtengo el usuario que se ha conectado
+        var user = socket.handshake.query.user;
+        
+        // pongo a false la conexon
+        users[user].connected = false;
+        // ejecuto al funcion setTime la cual si el atributo
+        // connected sigue en false, eliminara ese usuario
+        setTime(user);
    });
    
   
@@ -157,11 +164,22 @@ function addUser(){
 function updateUsers(){
     
 }
-// Este contador ejecutara la funcion close cada 5 segundos
-function setTime(){
-
+// Si al cabo de 5 segundos, el usuario no se ha vuelto a conectar, sera eliminado
+function setTime(username){
     setTimeout(function(){
-        close()
+        console.log('USUARIOOO: '+username);
+        try{
+            if(!users[username].connected){
+                delete users[username];
+                total--;
+                users['total'] = total;
+                console.log(total);
+                server.sockets.emit('update',users);
+            }
+        }
+        catch(err){
+            console.log('El usuario no existe');
+        }
     },5000);
 }
 
@@ -189,12 +207,13 @@ function close(){
 function createUsers(){
     console.log('ENTRADO EN CREAR USERS');
     var allClients = server.sockets.clients();
+    //console.log(server.sockets.clients());
     users = {};
     allClients.forEach(function(client){
+        //console.log(client);
         var user = client['user'].username;
-        users[user] = client['user'];
-       
-        server.sockets.emit('update',users);
+        users[user] = client['user'];  
     });
     
+    server.sockets.emit('update',users);
 }
