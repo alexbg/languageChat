@@ -140,6 +140,9 @@ server.sockets.on('connection',function(socket){
         setTime(user);
    });
    
+   socket.on('update',function(){
+       socket.emit('update',users);
+   })
   
 });
 

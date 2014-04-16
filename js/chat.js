@@ -3,6 +3,7 @@ $( document ).ready(function() {
     var error;
     var login = false;
     try{
+        // CAMBIAR EL NOMBRE DE USUARIO POR ID
         var client = io.connect('http://192.168.1.33:3000?user='+$.cookie('username'));
         error = false;
     }
@@ -24,6 +25,7 @@ $( document ).ready(function() {
             $.cookie('start',false,{ path: '/' });
         }
         
+        
         client.on('who',function(){
             var user = setInfoUser();
             //alert('whooo')
@@ -35,13 +37,18 @@ $( document ).ready(function() {
         // Actualizo la tabla con la nueva informacion
         client.on('update',function(users){
             //console.log(users);
-            
-            $.post('index.php?r=site/getGrid',users,function(data){
-                // muestro la tabla de los usuarios
-                $('#users').html(data);
-                //$('.summary').remove();
-            });
-            console.log(users.total);
+            try{
+                $.fn.yiiGridView.update('list-users',{data: users, type: 'POST'});
+                console.log('HA ENTRADOOOO');
+            }
+            catch(err){
+                 $.post('index.php?r=site/getGrid',users,function(data){
+                    // muestro la tabla de los usuarios
+                    $('#users').html(data);
+                    //$('.summary').remove();
+                });
+                //$.fn.yiiGridView.update('list-users');
+            }
             $('#total').html(users.total);
             
             //$.fn.yiiGridView.update('list-users');

@@ -96,57 +96,29 @@ class SiteController extends Controller
 		$this->render('contact',array('model'=>$model));
 	}
         
+        /**
+         * Genera la vista del chat
+         */
         public function actionChat(){
             
-            /*$prueba;
-            $class;
-            
-            foreach($_POST as $key=>$value){
-                if($key!='total'){
-                    $prueba[] = $value;
-                    $class[] = $key;
-                }
-                
-            }*/
-            //echo var_dump($prueba);
-            /*$dataProvider = new CArrayDataProvider($prueba,array(
+            $users = Array();
+           
+            // Genero el $dataProvider necesario, pero en este caso sera vacio
+            // solo se usara para generar la tabla principal y despues actualizarla
+            $dataProvider = new CArrayDataProvider($users,array(
                     'keyField'=>false
-                ));*/
-            // USAR EL server.sockets.clients() PARA GENERAR UN ARRAY Y 
-            // PASARLE SIEMPRE EL ARRAY AL COMPLETO AL GRID PARA QUE
-            // COMPRUEBE QUE HA CAMBIADO
-            // 
-            $user = Users::model()->findByPk(Yii::app()->user->id);
-            $user->online = 1;
-            if($user->save()){
-                
-                $dataProvider = new CActiveDataProvider('Users',array(
-                    'criteria'=>array(
-                        'condition'=>'online=true'
-                        )
-                    )
-                );
-                
-                $total = Users::model()->count('online=1');
-                
-            }
+                ));
 
-            /*$total = Users::model()->count('online=1');
-            }
+           
             
-            $dataProvider = new CActiveDataProvider('Users',array(
-                'criteria'=>array(
-                    'condition'=>'online=true'
-                )
-            ));
-            
-            $total = Users::model()->count('online=1');*/
-            
-            
-            $this->render('chat',array('dataProvider'=>$dataProvider,'total'=>$total));
+            $this->render('chat',array('dataProvider'=>$dataProvider,'total'=>0));
             
         }
         
+        /**
+         * Mediante peticion ajax, permite actualizar la tabla con los datos
+         * que se le pasan mediante POST
+         */
         public function actionGetGrid(){
             
             $users = Array();
@@ -164,12 +136,6 @@ class SiteController extends Controller
                     'keyField'=>false
                 ));
             
-            /*$dataProvider = new CActiveDataProvider('Users',array(
-                'criteria'=>array(
-                    'condition'=>'online=true'
-                )
-            ));*/
-            //echo var_dump($prueba);
             $this->renderPartial('chatGrid',array('dataProvider'=>$dataProvider));
             
         }

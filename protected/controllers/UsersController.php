@@ -32,7 +32,7 @@ class UsersController extends Controller
 				'users'=>array('*'),
 			),
 			array('allow', // allow authenticated user to perform 'create' and 'update' actions
-				'actions'=>array('create','update'),
+				'actions'=>array('create','update','GetInfoUser'),
 				'users'=>array('@'),
 			),
 			array('deny',  // deny all users
@@ -117,6 +117,23 @@ class UsersController extends Controller
                 $this->render('profile');
         }
         
+        /**
+         * Obtengo la informacion basica de un usuario
+         * y la preparo para enviarma mediante ajax
+         */
+        public function actionGetInfoUser(){
+            
+            $user = $this->loadModelByUsername($_GET['username']);
+            $send = Array(
+                'username'=>$user['username'],
+                'native'=>$user['native_language'],
+                'foreign'=>$user['foreign_language'],
+                'description'=>$user['descripcion'],
+            );
+            echo json_encode($send);
+          
+        }
+        
 	/**
 	 * Returns the data model based on the primary key given in the GET variable.
 	 * If the data model is not found, an HTTP exception will be raised.
@@ -127,6 +144,14 @@ class UsersController extends Controller
 	public function loadModel($id)
 	{
 		$model=Users::model()->findByPk($id);
+		if($model===null)
+			throw new CHttpException(404,'The requested page does not exist.');
+		return $model;
+	}
+        
+        public function loadModelByUsername($username)
+	{
+		$model=Users::model()->find('username=:username',array(':username'=>$username));
 		if($model===null)
 			throw new CHttpException(404,'The requested page does not exist.');
 		return $model;
