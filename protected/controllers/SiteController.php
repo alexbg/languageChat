@@ -137,6 +137,7 @@ class SiteController extends Controller
                 ));
             
             $this->renderPartial('chatGrid',array('dataProvider'=>$dataProvider));
+            //echo var_dump($users);
             
         }
 
@@ -174,12 +175,14 @@ class SiteController extends Controller
 	 */
 	public function actionLogout()
 	{
-                $user = Users::model()->findByPk(Yii::app()->user->id);
+                /*$user = Users::model()->findByPk(Yii::app()->user->id);
                 $user->online = 0;
                 if($user->save()){
                     Yii::app()->user->logout();
                     Yii::app()->request->cookies->clear();
-                }
+                }*/
+                Yii::app()->user->logout();
+                Yii::app()->request->cookies->clear();
 		//Yii::app()->user->logout();
 		$this->redirect(Yii::app()->homeUrl);
 	}

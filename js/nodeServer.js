@@ -2,6 +2,7 @@
 var server = require('socket.io').listen(3000);
 var url = require('url');
 var query = require('querystring');
+var mysql = require('mysql');
 
 // almacena informacion sobre los usuarios
 /**
@@ -19,7 +20,10 @@ var query = require('querystring');
 // Una lista a parte para tener la informacion de todos os usuarios
 // Es la lista que se le pasa al cliente para generar la tabla
 var users = {};
+//var user = {};
 var sockets = new Array();
+
+
 // Total de usuarios conectado
 var total = 0;
 //var clients = server.sockets.clients();
@@ -67,9 +71,65 @@ server.sockets.on('connection',function(socket){
    
    
    socket.on('dni',function(data){
-       if(!users.hasOwnProperty(data['username'])){
+       if(!users.hasOwnProperty(data['key'])){
+           
+           // configura la conexion con la base de datos y se conecta a
+           // la base de datos language_chat
+            var connection = mysql.createConnection({
+                host     : 'localhost',
+                user     : 'root',
+                password : '',
+                database : 'language_chat'
+              });
+              
+            //connection.connect();
             
-            
+            // Hago una query para obtener el username,native_language y foreign_language
+            // Cuando se completa la conexion se ejecuta el callback
+            connection.query(
+                    'SELECT username,native_language,foreign_language FROM users WHERE key_chat=? LIMIT 1',
+                    [data['key']],
+                    // en el callback, compruebo si ha habido algun error
+                    // en caso de que lo haya, lo muestro
+                    function(err, rows, fields){
+                        if(err){
+                            throw err
+                        }
+                        else{
+                            // si ha obtenido los datos, genero el user temporal
+                            // apra meter la informacion necesaria en users
+                            var user = {
+                                username:rows[0]['username'],
+                                native_language:rows[0]['native_language'],
+                                foreign_language:rows[0]['foreign_language'],
+                                connected:true,
+                            }
+                            
+                            // en le objeto users meto el la informacion del usuario
+                            // obtenida anteriormente y el identificador para ese
+                            // nombre sera la key_chat 
+                            users[data['key']] = user;
+                            
+                            // aumento en +1 el total de usuarios conectados
+                            if(total != 0){
+                                total++;
+                            }
+                            else{
+                                total = 1;
+                            }
+                            
+                            // lo almaceno en el objeto users
+                            users['total'] = total;
+                            
+                            // le digo a todos los usuarios conectados que 
+                            // actualicen als tablas
+                            server.sockets.emit('update',users);
+                        }
+                    }
+                );
+        
+            connection.end()
+            //console.log('USUARIO: '+user);
             //sockets.push(socket);
             
             /*s.push(data['username']);
@@ -86,16 +146,22 @@ server.sockets.on('connection',function(socket){
            // Y DE AHI OBTENER LA TABLA DE USUARIOS
             
             // ESTOS DATOS EN EL CLIENTE SE COJEN POR LAS COOKIES
-            var user = {
+            /*var user = {
                 'username':data['username'],
                 'native_language':data['native'],
                 'foreign_language':data['foreign'],
                 'connected':true,
-            }
-                    
+            }*/        
+            //console.log('LOG USER: '+user);
             
-            users[data['username']] = user
             
+            
+            //users[data['key']] = user;
+            
+            
+            
+            
+            //console.log(users);
             //var allClients = server.sockets.clients();
             //var totalClient =  allClients.length - 1;
             
@@ -105,7 +171,7 @@ server.sockets.on('connection',function(socket){
             // Aumento + 1 los clientes conectado cuando un usuario NUEVO se ha 
             // conectado
             
-            if(total != 0){
+            /*if(total != 0){
                 total++;
             }
             else{
@@ -114,14 +180,16 @@ server.sockets.on('connection',function(socket){
             
             users['total'] = total;
             
-            server.sockets.emit('update',users);
+            server.sockets.emit('update',users);*/
+            //console.log('USERSSSSSSSSSS: '+users);
+            
            
         }
         else{
             //setTime(data['username']);
             socket.emit('update',users);
-            users[data['username']].connected = true;
-            console.log(users[data['username']]);
+            users[data['key']].connected = true;
+            //console.log(users[data['key']]);
         }
    });
    
@@ -131,7 +199,7 @@ server.sockets.on('connection',function(socket){
         console.log('DESCONECTADOOO');
 
         // obtengo el usuario que se ha conectado
-        var user = socket.handshake.query.user;
+        var user = socket.handshake.query.key;
         
         // pongo a false la conexon
         users[user].connected = false;
@@ -168,12 +236,12 @@ function updateUsers(){
     
 }
 // Si al cabo de 5 segundos, el usuario no se ha vuelto a conectar, sera eliminado
-function setTime(username){
+function setTime(key){
     setTimeout(function(){
-        console.log('USUARIOOO: '+username);
+        console.log('USUARIOOO: '+key);
         try{
-            if(!users[username].connected){
-                delete users[username];
+            if(!users[key].connected){
+                delete users[key];
                 total--;
                 users['total'] = total;
                 console.log(total);

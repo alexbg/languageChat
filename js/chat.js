@@ -4,12 +4,12 @@ $( document ).ready(function() {
     var login = false;
     try{
         // CAMBIAR EL NOMBRE DE USUARIO POR ID
-        var client = io.connect('http://192.168.1.33:3000?user='+$.cookie('username'));
-        error = false;
+        var client = io.connect('http://192.168.1.33:3000?key='+$.cookie('key'));
+        //error = false;
     }
     catch(err){
-        //message($('#js-alert'),'El chat no esta disponible porque hay un error de conexion','warning');
-        error = true;
+        message($('#js-alert'),'El chat no esta disponible porque hay un error de conexion','warning');
+        //error = true;
         
     }
     //var user = setInfoUser();
@@ -18,12 +18,12 @@ $( document ).ready(function() {
     
        // si existe la cookie start, significa que se acaba de loguear
        // por eso envio el mensaje de login y cambioa la cookie a false
-       console.log($.cookie('start'));
+       /*console.log($.cookie('start'));
         if($.cookie('start') == true){
             //alert('loginnn');
             client.emit('login');
             $.cookie('start',false,{ path: '/' });
-        }
+        }*/
         
         
         client.on('who',function(){
@@ -42,12 +42,13 @@ $( document ).ready(function() {
                 console.log('HA ENTRADOOOO');
             }
             catch(err){
-                 $.post('index.php?r=site/getGrid',users,function(data){
+                 /*$.post('index.php?r=site/getGrid',users,function(data){
                     // muestro la tabla de los usuarios
                     $('#users').html(data);
                     //$('.summary').remove();
-                });
+                    });*/
                 //$.fn.yiiGridView.update('list-users');
+                //message($('#js-alert'),'Ha habido un error al buscar los usuarios conectados','info');
             }
             $('#total').html(users.total);
             
@@ -107,10 +108,11 @@ $( document ).ready(function() {
         user['username'] = $.cookie('username');
         user['native'] = $.cookie('native');
         user['foreign'] = $.cookie('foreign');
+        user['key'] = $.cookie('key');
         return user;
     }
                     
-    function error(){
+    /*function error(){
         if(error){
             message($('#js-alert'),'El chat no esta disponible','info'); 
         }
@@ -118,7 +120,7 @@ $( document ).ready(function() {
     
     function login(){
         login = true;
-    }
+    }*/
      
 });
 

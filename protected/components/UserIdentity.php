@@ -19,6 +19,7 @@ class UserIdentity extends CUserIdentity
             else
             {
                 $record->online = 0;
+                $record->key_chat = CPasswordHelper::hashPassword($record->username);
                 if($record->save()){
                     $this->_id=$record->id;
                     $this->setState('username', $record->username);
@@ -27,6 +28,7 @@ class UserIdentity extends CUserIdentity
                     Yii::app()->request->cookies['native'] = new CHttpCookie('native',$record->native_language);
                     Yii::app()->request->cookies['foreign'] = new CHttpCookie('foreign',$record->foreign_language);
                     Yii::app()->request->cookies['start'] = new CHttpCookie('start',true);
+                    Yii::app()->request->cookies['key'] = new CHttpCookie('key',$record->key_chat);
                     $this->errorCode=self::ERROR_NONE;
                 }
                 else{
