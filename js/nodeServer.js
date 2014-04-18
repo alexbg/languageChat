@@ -1,7 +1,7 @@
 // inicia un socket cuya funcion es ser de servidor
 var server = require('socket.io').listen(3000);
-var url = require('url');
-var query = require('querystring');
+//var url = require('url');
+//var query = require('querystring');
 var mysql = require('mysql');
 
 // almacena informacion sobre los usuarios
@@ -21,9 +21,39 @@ var mysql = require('mysql');
 // Es la lista que se le pasa al cliente para generar la tabla
 var users = {};
 
+/**
+ * Cuando un usuario envia una peticion, en rooms se genera un nuevo lugar{}
+ * con la key del usuario que hizo la peticion. Dentro de ese objeto generado
+ * Se almacenara el numero de la habitacion y dentro de ese numero estara el objeto
+ * que almacene las keys del los usuarios que estan hablando
+ * Cada usuario que este en una sala privada, se generara un objeto con su key
+ * en rooms. De esta forma cada usuario sabe con que usuarios estaban en la sala
+ * {identificador_usuario={
+ *          'numero habitacion' = {keys}
+ *      }
+ * }
+ * 
+ * @type type
+ */
+
+// Almacena las salas privadas creadas, junto las keys de quien las ocupa y 
+// el nombre
+var rooms = {}
+
+// Es el numero de habitaciones que hay
+var roomNumber = 1;
+
+// Es la relacion entre la key y leel socket
+var relations = {};
+
+// las peticiones que hay pendientes para entrar en una  sala privada
+var petitions = {};
 
 // Total de usuarios conectado
 var total = 0;
+
+// relaciona el numero de habitacion con el propietariod e la habitacion
+var hostNumber = {};
 //var clients = server.sockets.clients();
 server.sockets.on('connection',function(socket){
     
@@ -82,6 +112,9 @@ server.sockets.on('connection',function(socket){
                          // lo almaceno en el objeto users
                          users['total'] = total;
 
+                         // guardo la relacion de la key con el socket
+                         relations[key] = socket;
+
                          // le digo a todos los usuarios conectados que 
                          // actualicen als tablas
                          server.sockets.emit('update',users);
@@ -93,12 +126,23 @@ server.sockets.on('connection',function(socket){
      }
      else{
          //setTime(data['username']);
+         // guardo la relacion de la key con el socket
+         relations[key] = socket;
          socket.emit('update',users);
          users[key].connected = true;
+         if(petitions.hasOwnProperty(key)){
+             petitions[key].forEach(function(numberRoom){
+                 var host = hostNumber[numberRoom];
+                 var user = users[host].username;
+                 var data = {
+                     user: user,
+                     room: numberRoom
+                 }
+                 socket.emit('repeatPetition',data);
+             })
+         }
          //console.log(users[data['key']]);
      }
-  
-   
   
    // Se ejecuta cuando el usuario se desconecta
    socket.on('disconnect',function(){
@@ -116,7 +160,60 @@ server.sockets.on('connection',function(socket){
    
    socket.on('update',function(){
        socket.emit('update',users);
-   })
+   });
+   
+   // Permite al que hace la peticion, genear la habitacion y enviar
+   // la peticion al usuario
+   socket.on('join',function(key){
+       //console.log(key);
+       // obtengo la key del usuario que ha enviado la peticion
+       var host = socket.handshake.query.key;
+       
+       // compruebo si rooms ya tiene la key del host(del que hace la peticion)
+       // en caso de no tenerla, genera el array y inserta el numero de habitacion en el array
+       if(!rooms.hasOwnProperty(host)){
+           
+            rooms[host] = new Array();
+            
+            rooms[host].push(roomNumber);
+            
+            hostNumber[roomNumber] = host;
+        }
+        else{
+            
+            rooms[host].push(roomNumber);
+            
+            hostNumber[roomNumber] = host;
+        }
+        
+        // compruebo si ya la key del invitado esta en peticiones y guardo
+        // la key
+        if(!petitions.hasOwnProperty(key)){
+       
+            petitions[key] = new Array();
+            
+            petitions[key].push(roomNumber);
+            
+        }
+        else{
+            
+            petitions[key].push(roomNumber);
+              
+        }
+        // preparo la informacion que sera enviada al usuario
+        // nombre de usuario y el numero de la habitacion
+        var data={
+            user: users[host]['username'],
+            room: roomNumber
+        };
+        
+        relations[key].emit('petition',data);
+        
+        // aumento en +1 el numero de la habitacion
+        roomNumber++;
+        
+        console.log(users[host]);
+   });
   
 });
 
@@ -152,4 +249,8 @@ function setTime(key){
             console.log('El usuario no existe');
         }
     },5000);
+}
+
+function findUser(){
+    
 }

@@ -129,6 +129,7 @@ class UsersController extends Controller
                 'native'=>$user['native_language'],
                 'foreign'=>$user['foreign_language'],
                 'description'=>$user['description'],
+                'key'=>$user['key_chat']
             );
             echo json_encode($send);
           

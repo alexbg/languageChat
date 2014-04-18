@@ -4,7 +4,7 @@
  * un modal
  * @returns {undefined}
  */
-function showProfiles(){
+/*function showProfiles(){
    $(".show").off("click").on('click',function(event){
        event.preventDefault();
        $.get(
@@ -15,9 +15,13 @@ function showProfiles(){
                     $('#foreign').html(data.foreign);
                     $('#description').html(data.description);
                     $('#myModal').foundation('reveal', 'open');
+                    $('#sendPetition').off('click').on('click',function(event){
+                        event.preventDefault();
+                        sendPetition(data.key);
+                    });
                 },
                 'json'
             );
    });
-} 
+}*/ 
 
