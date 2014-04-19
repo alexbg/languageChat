@@ -36,7 +36,7 @@ class SiteController extends Controller
 				'users'=>array('*'),
 			),
 			array('allow', // allow authenticated user to perform 'create' and 'update' actions
-				'actions'=>array('chat','logout','getGrid'),
+				'actions'=>array('chat','logout','getGrid','CreateChatRoom'),
 				'users'=>array('@'),
 			),
 			array('deny',  // deny all users
@@ -186,4 +186,17 @@ class SiteController extends Controller
 		//Yii::app()->user->logout();
 		$this->redirect(Yii::app()->homeUrl);
 	}
+        
+        public function actionCreateChatRoom(){
+            
+            $data = Array(
+                'host'=>$_POST['host'],
+                'inv'=>$_POST['inv'],
+                'room'=>$_POST['room']
+            );
+            
+            //$data['host'=>$_POST['host']]
+            
+            $this->renderPartial('privateChat',array('data'=>$data),false,true);
+        }
 }

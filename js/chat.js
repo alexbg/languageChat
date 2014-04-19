@@ -118,15 +118,48 @@ $( document ).ready(function() {
             //li.html('pruebaaaa');
         })
         
+        // muestra un mensaje cuando una peticion es rechazada
         client.on('reject',function(data){
             message($('#js-alert'),'El usuario: '+data.user+' ha rechazado tu invitacion','info');
             //$('#room-'+data.room).remove();
         });
         
+        // muestra un mensaje cuando una peticion es aceptada
         client.on('accept',function(user){
             message($('#js-alert'),'El usuario: '+user+' ha aceptado tu invitacion','info');
             //$('#room-'+data.room).remove();
+        });
+        
+        // Crea la sala privada y prepara los botones y todo lo necesario
+        client.on('createPrivate',function(data){
+            //alert('ENVIADO A LOS DOS');
+            
+            $.post('http://localhost/languageChat/index.php?r=site/CreateChatRoom',
+                   data,function(html){
+                       // en privated-chats meto el html recibido del renderPartial
+                       $('#privated-chats').append(html);
+                       // añado un evento de click al boton, para que envie el mensage
+                       $('#b-'+data['room']).on('click',function(event){
+                           var sendData = {
+                               message: $('#t-'+data['room']).val(),
+                               room: data['room']
+                           }
+                           client.emit('sendRoom',sendData);
+                       });
+                   },
+                   'html');
+            
+        });
+        
+        // Escribe el mensaje que ha recibido en el chat privado
+        client.on('message',function(data){
+            //alert('recibido');
+            $('#c-'+data['room']).append('<li><strong>'+data['user']+': </strong>'+data['message']+'</li>');
         })
+    }
+    
+    function createChatRoom(){
+        
     }
     
     /*function sendPetition(key){

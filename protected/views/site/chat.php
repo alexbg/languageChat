@@ -51,46 +51,9 @@
             </div>
           </dd>
         </dl>
-        <div class="small-12 medium-6 column">
-         <dl class="accordion" data-accordion>
-           <dd>
-             <a href="#chat1">Chat1</a>
-             <div id="chat1" class="content active">
-                fdsafdsafdsafdsfsa
-             </div>
-           </dd>
-         </dl>
-     </div>
-        <div class="small-12 medium-6 column">
-         <dl class="accordion" data-accordion>
-           <dd>
-             <a href="#chat1">Chat1</a>
-             <div id="chat1" class="content active">
-                fdsafdsafdsafdsfsa
-             </div>
-           </dd>
-         </dl>
-     </div>
-        <div class="small-12 medium-6 column">
-         <dl class="accordion" data-accordion>
-           <dd>
-             <a href="#chat1">Chat1</a>
-             <div id="chat1" class="content active">
-                fdsafdsafdsafdsfsa
-             </div>
-           </dd>
-         </dl>
-     </div>
-        <div class="small-12 medium-6 column">
-         <dl class="accordion" data-accordion>
-           <dd>
-             <a href="#chat1">Chat1</a>
-             <div id="chat1" class="content active">
-                fdsafdsafdsafdsfsa
-             </div>
-           </dd>
-         </dl>
-     </div>
+        <div id="privated-chats" >
+            
+        </div>
     </div>
     <div class="small-12 medium-4 column">
         <dl class="accordion" data-accordion>

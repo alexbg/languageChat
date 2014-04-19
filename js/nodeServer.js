@@ -329,10 +329,38 @@ server.sockets.on('connection',function(socket){
       
         // El usuario que ha aceptado la peticion
         var user = users[key].username;
-      
+        
+        // emito un comunicado al anfitrion, diciendole que se ha aceptado la solicitud
         relations[host].emit('accept',user);
+        
+        // Preparo los datos para ser enviados los dos usuarios
+        var data = {
+            host: users[host].username,
+            inv: users[key].username,
+            room: room
+        }
+        
+        // envio un mensaje a los dos usuarios que estan en la sala privada
+        server.sockets.in(room).emit('createPrivate',data);
+        
       
         console.log('PETICION ACEPTADAAAAAAA');
+  });
+  
+  // Cuando se reciba un mensaje, se enviara a todos los de esa habitacion
+  socket.on('sendRoom',function(data){
+      console.log('RECIBIDO PARA LA HABITACION');
+      
+      if(data['message'] != ''){
+
+            var message = {
+                message: data['message'],
+                user: users[key].username,
+                room: data['room']
+            }
+
+            server.sockets.in(data['room']).emit('message',message);
+        }
   })
   
 });
