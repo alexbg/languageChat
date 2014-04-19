@@ -38,21 +38,49 @@ var users = {};
 
 // Almacena las salas privadas creadas, junto las keys de quien las ocupa y 
 // el nombre
+/**
+ * rooms => {
+ *  'key del usuario' : array(1,2,3,4(numero de las habitaciones))
+ * }
+ * @type Array|Array
+ */
 var rooms = {}
 
 // Es el numero de habitaciones que hay
 var roomNumber = 1;
 
 // Es la relacion entre la key y leel socket
+/**
+ * relations => {
+ * 
+ *  key del usuario : socket en esa conexion
+ * }
+ * @type socket|socket
+ */
 var relations = {};
 
 // las peticiones que hay pendientes para entrar en una  sala privada
+/**
+ * petitions => {
+ * 
+ *  'key del usuario' : array(1,2,3,4(numero de las habitaciones))
+ * }
+ * @type Array
+ */
 var petitions = {};
 
 // Total de usuarios conectado
 var total = 0;
 
-// relaciona el numero de habitacion con el propietariod e la habitacion
+// relaciona el numero de habitacion con el propietariod de la habitacion
+/**
+ * hostNumber => {
+ * 
+ *  numero de la habitacion: key del que hizo la peticion para un chat privado
+ * }
+ * 
+ * @type host|host|host|host
+ */
 var hostNumber = {};
 //var clients = server.sockets.clients();
 server.sockets.on('connection',function(socket){
@@ -130,6 +158,9 @@ server.sockets.on('connection',function(socket){
          relations[key] = socket;
          socket.emit('update',users);
          users[key].connected = true;
+         // compruebo si el usuario tiene peticiones pendientes,
+         // en caso de ser asi, las recogera y asl enviara con la peticion
+         // repeatPetition
          if(petitions.hasOwnProperty(key)){
              petitions[key].forEach(function(numberRoom){
                  var host = hostNumber[numberRoom];
@@ -173,15 +204,15 @@ server.sockets.on('connection',function(socket){
        // en caso de no tenerla, genera el array y inserta el numero de habitacion en el array
        if(!rooms.hasOwnProperty(host)){
            
-            rooms[host] = new Array();
+            //rooms[host] = new Array();
             
-            rooms[host].push(roomNumber);
+            //rooms[host].push(roomNumber);
             
             hostNumber[roomNumber] = host;
         }
         else{
             
-            rooms[host].push(roomNumber);
+            //rooms[host].push(roomNumber);
             
             hostNumber[roomNumber] = host;
         }
@@ -190,12 +221,16 @@ server.sockets.on('connection',function(socket){
         // la key
         if(!petitions.hasOwnProperty(key)){
        
+            hostNumber[roomNumber] = host;
+       
             petitions[key] = new Array();
             
             petitions[key].push(roomNumber);
             
         }
         else{
+            
+            hostNumber[roomNumber] = host;
             
             petitions[key].push(roomNumber);
               
@@ -214,6 +249,91 @@ server.sockets.on('connection',function(socket){
         
         console.log(users[host]);
    });
+  
+  // Elimina una peticion de union a una sala privada
+  socket.on('reject',function(room){
+      
+      // eliminacion de la peticion
+      var index = petitions[key].indexOf(room);
+      
+      petitions[key].splice(index,1);
+      
+      // eliminacion de del creador de la peticion
+      var host = hostNumber[room];
+      
+      delete hostNumber[room];
+      
+      console.log('PETICION DE HABITACION ELIMINADA');
+      
+      // Envio la informacion al usuario que inicio la peticion privada
+      
+      // el usuario es key porque es el que ha rechazado la invitacion el que emite el
+      // reject, por eso, tiene que ser key
+      var data = {
+          user: users[key].username,
+          room: room
+      };
+      
+      relations[host].emit('reject',data);
+  });
+  
+  // Permite aceptar las peticiones de habitaciones privadas
+  socket.on('accept',function(room){
+      
+      // Como la peticion ha sido aceptada, la elimino
+      var index = petitions[key].indexOf(room);
+      
+      petitions[key].splice(index,1);
+      
+      // obtento la key del que realizo la peticion
+      var host = hostNumber[room];
+      
+        // Ahora en cada room[key] genero una nueva sala
+        // para el anfitrion, es decir, el que realizo la peticion y es el host
+        if(!rooms.hasOwnProperty(host)){
+
+            rooms[host] = new Array();
+
+            rooms[host].push(roomNumber);
+
+            
+        }
+        else{
+
+            rooms[host].push(roomNumber);
+
+            
+        }
+        
+        // para el que acepta la peticion
+        if(!rooms.hasOwnProperty(key)){
+
+            rooms[key] = new Array();
+
+            rooms[key].push(roomNumber);
+
+            
+        }
+        else{
+
+            rooms[key].push(roomNumber);
+  
+        }
+      
+        // Genero la room en el socket y los meto en ella
+        
+        // el usuario que acepta la peticion
+        socket.join(room);
+        // el usuario que realiza la peticion(el propietario de la sala privada)
+        relations[host].join(room);
+      
+        // El usuario que ha aceptado la peticion
+        var user = users[key].username;
+      
+        relations[host].emit('accept',user);
+      
+        console.log('PETICION ACEPTADAAAAAAA');
+  })
   
 });
 

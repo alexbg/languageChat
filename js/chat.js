@@ -46,7 +46,39 @@ $( document ).ready(function() {
             inv = inv + 1;
             $('#ninv').html(inv);
             
-            var li = $('#list-invtations').append('<li>'+data.user+': <button class="tiny">Aceptar</button> <button class="tiny">Rechazar</button></li>');
+            // El id es a-Numero habitacion(para el boton aceptar)
+            // El id es r-Numero habitacion(para el boton rechazar)
+            
+            var li = $('#list-invtations').append('<li id=room-'+data.room+'>'+data.user+': <button class="tiny" id=a-'+data.room+'>Aceptar</button> <button class="tiny" id=r-'+data.room+'>Rechazar</button></li>');
+            
+            // añado el evento click al boton aceptar
+            $('#a-'+data.room).on('click',function(event){
+                //alert('SOY UN ACPETAR');
+                client.emit('accept',data.room);
+                
+                // elimino el elemento con los botones y la lista
+                $('#room-'+data.room).remove();
+                
+                // cambio el numero de invitaciones
+                var inv = parseInt($('#ninv').html());
+                inv = inv - 1;
+                $('#ninv').html(inv);
+            })
+            
+            $('#r-'+data.room).on('click',function(event){
+                
+                //alert('SOY UN RECHAZAR');
+                // envio un mensaje apra que se entere el usuario rechazado
+                client.emit('reject',data.room);
+                
+                // elimino el elemento con los botones y la lista
+                $('#room-'+data.room).remove();
+                
+                // cambio el numero de invitaciones
+                var inv = parseInt($('#ninv').html());
+                inv = inv - 1;
+                $('#ninv').html(inv);
+            })
             //li.html('pruebaaaa');
         })
         
@@ -57,8 +89,43 @@ $( document ).ready(function() {
             inv = inv + 1;
             $('#ninv').html(inv);
             
-            var li = $('#list-invtations').append('<li>'+data.user+': <button class="tiny">Aceptar</button> <button class="tiny">Rechazar</button></li>');
+            var li = $('#list-invtations').append('<li id=room-'+data.room+'>'+data.user+': <button class="tiny" id=a-'+data.room+'>Aceptar</button> <button class="tiny" id=r-'+data.room+'>Rechazar</button></li>');
+            
+            $('#a-'+data.room).on('click',function(event){
+                client.emit('accept',data.room);
+                
+                // elimino el elemento con los botones y la lista
+                $('#room-'+data.room).remove();
+                
+                // cambio el numero de invitaciones
+                var inv = parseInt($('#ninv').html());
+                inv = inv - 1;
+                $('#ninv').html(inv);
+            })
+            
+            $('#r-'+data.room).on('click',function(event){
+                //alert('SOY UN RECHAZAR');
+                // envio un mensaje apra que se entere el usuario rechazado
+                client.emit('reject',data.room);
+                // elimino el elemento con los botones y la lista
+                $('#room-'+data.room).remove();
+                
+                // cambio el numero de invitaciones
+                var inv = parseInt($('#ninv').html());
+                inv = inv - 1;
+                $('#ninv').html(inv);
+            })
             //li.html('pruebaaaa');
+        })
+        
+        client.on('reject',function(data){
+            message($('#js-alert'),'El usuario: '+data.user+' ha rechazado tu invitacion','info');
+            //$('#room-'+data.room).remove();
+        });
+        
+        client.on('accept',function(user){
+            message($('#js-alert'),'El usuario: '+user+' ha aceptado tu invitacion','info');
+            //$('#room-'+data.room).remove();
         })
     }
     
