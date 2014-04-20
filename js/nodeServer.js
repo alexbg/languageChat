@@ -74,14 +74,30 @@ var total = 0;
 
 // relaciona el numero de habitacion con el propietariod de la habitacion
 /**
- * hostNumber => {
+ * privateChats => {
  * 
- *  numero de la habitacion: key del que hizo la peticion para un chat privado
+ *  numero de la habitacion: array(key del que realzio la peticion,
+ *                                  key del que acepta la peticion)
  * }
  * 
  * @type host|host|host|host
  */
-var hostNumber = {};
+var privateChats = {};
+
+// Aqui se guardan las conversaciones de cada sala de chat privada
+/**
+ * speechs => {
+ * 
+ *  numero de la habitacion => {
+ *  
+ *      username => Array(conversacion,conversacion)
+ *      username2 => Array(conversacion, conversacion)
+ *  }
+ * 
+ * }
+ * @type type
+ */
+var speechs = {}
 //var clients = server.sockets.clients();
 server.sockets.on('connection',function(socket){
     
@@ -158,12 +174,13 @@ server.sockets.on('connection',function(socket){
          relations[key] = socket;
          socket.emit('update',users);
          users[key].connected = true;
+         
          // compruebo si el usuario tiene peticiones pendientes,
          // en caso de ser asi, las recogera y asl enviara con la peticion
          // repeatPetition
          if(petitions.hasOwnProperty(key)){
              petitions[key].forEach(function(numberRoom){
-                 var host = hostNumber[numberRoom];
+                 var host = privateChats[numberRoom][0];
                  var user = users[host].username;
                  var data = {
                      user: user,
@@ -172,12 +189,37 @@ server.sockets.on('connection',function(socket){
                  socket.emit('repeatPetition',data);
              })
          }
-         //console.log(users[data['key']]);
+         
+         // Compruebo si el usuario tiene alguna sala privada abierta
+         // En ese caso, le pedire que la abra de nuevo
+         if(rooms[key] != undefined){
+             
+             rooms[key].forEach(function(numberRoom){
+                try{
+                    var host = privateChats[numberRoom][0];
+                    var data = {
+                        host: users[host].username,
+                        inv: users[key].username,
+                        room: numberRoom,
+                        speech: speechs[numberRoom]
+                    }
+                    // Le vuevo a meter en la sala
+                    socket.join(numberRoom);
+                    // se envia a si mismo los chats abiertos que tiene
+                    // para poder generarlos de nuevo
+                    socket.emit('createPrivate',data);
+                }
+                catch(err){
+                    console.log('Error en la habitacion');
+                }
+             });
+             
+         }
      }
   
    // Se ejecuta cuando el usuario se desconecta
    socket.on('disconnect',function(){
-        console.log('DESCONECTADOOO');
+        //console.log('DESCONECTADOOO');
 
         // obtengo el usuario que se ha conectado
         var user = socket.handshake.query.key;
@@ -199,29 +241,17 @@ server.sockets.on('connection',function(socket){
        //console.log(key);
        // obtengo la key del usuario que ha enviado la peticion
        var host = socket.handshake.query.key;
-       
-       // compruebo si rooms ya tiene la key del host(del que hace la peticion)
-       // en caso de no tenerla, genera el array y inserta el numero de habitacion en el array
-       if(!rooms.hasOwnProperty(host)){
-           
-            //rooms[host] = new Array();
+ 
             
-            //rooms[host].push(roomNumber);
-            
-            hostNumber[roomNumber] = host;
-        }
-        else{
-            
-            //rooms[host].push(roomNumber);
-            
-            hostNumber[roomNumber] = host;
-        }
-        
+            privateChats[roomNumber] = new Array();
+            privateChats[roomNumber].push(host);
+
+
         // compruebo si ya la key del invitado esta en peticiones y guardo
         // la key
         if(!petitions.hasOwnProperty(key)){
        
-            hostNumber[roomNumber] = host;
+            
        
             petitions[key] = new Array();
             
@@ -229,8 +259,6 @@ server.sockets.on('connection',function(socket){
             
         }
         else{
-            
-            hostNumber[roomNumber] = host;
             
             petitions[key].push(roomNumber);
               
@@ -247,10 +275,11 @@ server.sockets.on('connection',function(socket){
         // aumento en +1 el numero de la habitacion
         roomNumber++;
         
-        console.log(users[host]);
+        //console.log(users[host]);
    });
   
   // Elimina una peticion de union a una sala privada
+  // recibe el numero de la habitacion
   socket.on('reject',function(room){
       
       // eliminacion de la peticion
@@ -259,11 +288,13 @@ server.sockets.on('connection',function(socket){
       petitions[key].splice(index,1);
       
       // eliminacion de del creador de la peticion
-      var host = hostNumber[room];
+      // 0: El que realizo la peticion
+      // 1: el que acepta la peticion
+      var host = privateChats[room][0];
       
-      delete hostNumber[room];
+      delete privateChats[room];
       
-      console.log('PETICION DE HABITACION ELIMINADA');
+      //console.log('PETICION DE HABITACION ELIMINADA');
       
       // Envio la informacion al usuario que inicio la peticion privada
       
@@ -274,10 +305,13 @@ server.sockets.on('connection',function(socket){
           room: room
       };
       
+      // emito el reject al usuario host, que es el que creo la peticion
+      
       relations[host].emit('reject',data);
   });
   
   // Permite aceptar las peticiones de habitaciones privadas
+  // recibe el numero de la habitacion
   socket.on('accept',function(room){
       
       // Como la peticion ha sido aceptada, la elimino
@@ -286,7 +320,7 @@ server.sockets.on('connection',function(socket){
       petitions[key].splice(index,1);
       
       // obtento la key del que realizo la peticion
-      var host = hostNumber[room];
+      var host = privateChats[room][0];
       
         // Ahora en cada room[key] genero una nueva sala
         // para el anfitrion, es decir, el que realizo la peticion y es el host
@@ -294,13 +328,13 @@ server.sockets.on('connection',function(socket){
 
             rooms[host] = new Array();
 
-            rooms[host].push(roomNumber);
+            rooms[host].push(room);
 
             
         }
         else{
 
-            rooms[host].push(roomNumber);
+            rooms[host].push(room);
 
             
         }
@@ -310,19 +344,22 @@ server.sockets.on('connection',function(socket){
 
             rooms[key] = new Array();
 
-            rooms[key].push(roomNumber);
-
+            rooms[key].push(room);
+            
+            privateChats[room].push(key);
             
         }
         else{
 
-            rooms[key].push(roomNumber);
-  
+            rooms[key].push(room);
+            
+            privateChats[room].push(key);
         }
       
         // Genero la room en el socket y los meto en ella
         
         // el usuario que acepta la peticion
+        // socket es el usuario que acepto la peticion
         socket.join(room);
         // el usuario que realiza la peticion(el propietario de la sala privada)
         relations[host].join(room);
@@ -333,7 +370,7 @@ server.sockets.on('connection',function(socket){
         // emito un comunicado al anfitrion, diciendole que se ha aceptado la solicitud
         relations[host].emit('accept',user);
         
-        // Preparo los datos para ser enviados los dos usuarios
+        // Preparo los datos para ser enviados a los dos usuarios
         var data = {
             host: users[host].username,
             inv: users[key].username,
@@ -343,13 +380,18 @@ server.sockets.on('connection',function(socket){
         // envio un mensaje a los dos usuarios que estan en la sala privada
         server.sockets.in(room).emit('createPrivate',data);
         
-      
-        console.log('PETICION ACEPTADAAAAAAA');
+        // genero los arrays para cada usuario(host e invitado), donde
+        // se guardaran las conversaciones
+        speechs[room] = {};
+        speechs[room][data['host']] = new Array();
+        speechs[room][data['inv']] = new Array();
+        
+        //console.log('PETICION ACEPTADAAAAAAA');
   });
   
   // Cuando se reciba un mensaje, se enviara a todos los de esa habitacion
   socket.on('sendRoom',function(data){
-      console.log('RECIBIDO PARA LA HABITACION');
+      //console.log('RECIBIDO PARA LA HABITACION');
       
       if(data['message'] != ''){
 
@@ -357,8 +399,11 @@ server.sockets.on('connection',function(socket){
                 message: data['message'],
                 user: users[key].username,
                 room: data['room']
-            }
+            };
 
+            // Guardo la conversacion
+            speechs[data['room']][message['user']].push(data['message']);
+            // envio la informacion del mensaje
             server.sockets.in(data['room']).emit('message',message);
         }
   })
@@ -383,18 +428,26 @@ function getInfo(socket){
 // Si al cabo de 5 segundos, el usuario no se ha vuelto a conectar, sera eliminado
 function setTime(key){
     setTimeout(function(){
-        console.log('USUARIOOO: '+key);
+        //console.log('USUARIOOO: '+key);
         try{
             if(!users[key].connected){
+                // elimino al usuario
                 delete users[key];
                 total--;
+                // cambio el total de usuarios conectado
                 users['total'] = total;
-                console.log(total);
+                //console.log(total);
+                // envio un mensaje a todos de que actualicen las tablas
                 server.sockets.emit('update',users);
+                // elimino las habitaciones en las que estaba el usuario
+                rooms[key].forEach(function(room){
+                    server.sockets.in(room).emit('message','Un chat privado se ha eliminado');
+                    delete privateChats[room];
+                })
             }
         }
         catch(err){
-            console.log('El usuario no existe');
+            //console.log('El usuario no existe');
         }
     },5000);
 }

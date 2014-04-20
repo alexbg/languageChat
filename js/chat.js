@@ -104,7 +104,7 @@ $( document ).ready(function() {
             })
             
             $('#r-'+data.room).on('click',function(event){
-                //alert('SOY UN RECHAZAR');
+                
                 // envio un mensaje apra que se entere el usuario rechazado
                 client.emit('reject',data.room);
                 // elimino el elemento con los botones y la lista
@@ -146,6 +146,12 @@ $( document ).ready(function() {
                            }
                            client.emit('sendRoom',sendData);
                        });
+                       /*if(data['speech'] != undefined){
+                           data['speech'].forEach(function(text){
+                               alert(data['user']);
+                                $('#c-'+data['room']).append('<li><strong>'+data['user']+': </strong>'+text+'</li>');
+                           });
+                       }*/
                    },
                    'html');
             
@@ -155,6 +161,11 @@ $( document ).ready(function() {
         client.on('message',function(data){
             //alert('recibido');
             $('#c-'+data['room']).append('<li><strong>'+data['user']+': </strong>'+data['message']+'</li>');
+            $('#t-'+data['room']).val('');
+        })
+        
+        client.on('info',function(message){
+             message($('#js-alert'),message,'info');
         })
     }
     
