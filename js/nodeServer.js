@@ -88,12 +88,8 @@ var privateChats = {};
 /**
  * speechs => {
  * 
- *  numero de la habitacion => {
+ *  numero de la habitacion => array({user,text}{user,text})
  *  
- *      username => Array(conversacion,conversacion)
- *      username2 => Array(conversacion, conversacion)
- *  }
- * 
  * }
  * @type type
  */
@@ -382,9 +378,8 @@ server.sockets.on('connection',function(socket){
         
         // genero los arrays para cada usuario(host e invitado), donde
         // se guardaran las conversaciones
-        speechs[room] = {};
-        speechs[room][data['host']] = new Array();
-        speechs[room][data['inv']] = new Array();
+        speechs[room] = new Array();
+        
         
         //console.log('PETICION ACEPTADAAAAAAA');
   });
@@ -402,7 +397,7 @@ server.sockets.on('connection',function(socket){
             };
 
             // Guardo la conversacion
-            speechs[data['room']][message['user']].push(data['message']);
+            speechs[data['room']].push({user: message['user'],text: message['message']})
             // envio la informacion del mensaje
             server.sockets.in(data['room']).emit('message',message);
         }

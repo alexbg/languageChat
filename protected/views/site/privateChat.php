@@ -1,4 +1,4 @@
-<div class="small-12 medium-6 column">
+<div class="small-12 medium-6 column left">
     <dl class="accordion" data-accordion>
         <dd>
             <?php echo CHtml::link($data['host'].' and '.$data['inv'], '#p-'.$data['room']) ?>
@@ -23,5 +23,7 @@
         </dd>
     </dl>
 </div> 
-
+<script>
+  $(document).foundation();
+</script>
 

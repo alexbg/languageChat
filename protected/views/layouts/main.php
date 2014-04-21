@@ -116,18 +116,19 @@
             <a href="#" class="close">&times;</a>
         </div>-->
                 
-        <main class="small-11 small-centered columns">
+        <main class="small-12 columns">
             <?php echo $content; ?>
         </main>
 
 	<div class="clear"></div>
-
-	<footer class="medium-3 medium-centered columns small-12">
-		Copyright &copy; <?php echo date('Y'); ?> by My Company.<br/>
-		All Rights Reserved.<br/>
-		<?php echo Yii::powered(); ?>
-	</footer><!-- footer -->
-
+        
+        <div class="small-12 medium-12 column">
+            <footer>
+                    Copyright &copy; <?php echo date('Y'); ?> by My Company.<br/>
+                    All Rights Reserved.<br/>
+                    <?php echo Yii::powered(); ?>
+            </footer><!-- footer -->
+        </div>
 </div><!-- page -->
 
 <?php Yii::app()->clientScript->registerCoreScript('jquery'); ?>

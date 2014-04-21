@@ -11,46 +11,48 @@
 <div class="small-12 column">
     
     <div class="small-12 medium-8 column">
-        <dl class="accordion" data-accordion>
-          <dd>
-            <a href="#users">Users online: <span id="total"><?php echo $total; ?></span></a>
-            <div id="users" class="content active">
-               <?php 
-                    $this->widget('zii.widgets.grid.CGridView', array(
-                    'id'=>'list-users',
-                    'dataProvider'=>$dataProvider,
-                    'afterAjaxUpdate'=>'function(){showProfiles()}',  
-                    'ajaxUrl'=>Yii::app()->createUrl('site/getGrid'),    
-                    'columns'=>array(
-                        'username',
-                        'native_language',
-                        'foreign_language',
-                       array(
-                        'class'=>'CButtonColumn',
-                        'header'=>'Buttons',
-                        'template' => '{profile} {private}',   
-                        'buttons'=>array(
-                            'profile'=>array(
-                                'label'=>'show profile',
-                                'url'=>'Yii::app()->createUrl("users/getInfoUser",array("username"=>$data["username"]))',
-                                'options'=>array(
-                                    'class'=>'show',   
+        <div class="small-12 medium-12 column">
+            <dl class="accordion" data-accordion>
+              <dd>
+                <a href="#users">Users online: <span id="total"><?php echo $total; ?></span></a>
+                <div id="users" class="content active">
+                   <?php 
+                        $this->widget('zii.widgets.grid.CGridView', array(
+                        'id'=>'list-users',
+                        'dataProvider'=>$dataProvider,
+                        'afterAjaxUpdate'=>'function(){showProfiles()}',  
+                        'ajaxUrl'=>Yii::app()->createUrl('site/getGrid'),    
+                        'columns'=>array(
+                            'username',
+                            'native_language',
+                            'foreign_language',
+                           array(
+                            'class'=>'CButtonColumn',
+                            'header'=>'Buttons',
+                            'template' => '{profile} {private}',   
+                            'buttons'=>array(
+                                'profile'=>array(
+                                    'label'=>'show profile',
+                                    'url'=>'Yii::app()->createUrl("users/getInfoUser",array("username"=>$data["username"]))',
+                                    'options'=>array(
+                                        'class'=>'show',   
+                                        ),
                                     ),
+                                'private'=>array(
+                                    'label'=>'start chat'
+                                    )
                                 ),
-                            'private'=>array(
-                                'label'=>'start chat'
-                                )
-                            ),
+                            )
+                        ),
+                        'htmlOptions'=>array(
+                            'class'=>''
                         )
-                    ),
-                    'htmlOptions'=>array(
-                        'class'=>''
-                    )
-                ));
-                ?>
-            </div>
-          </dd>
-        </dl>
+                    ));
+                    ?>
+                </div>
+              </dd>
+            </dl>
+        </div>
         <div id="privated-chats" >
             
         </div>

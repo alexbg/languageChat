@@ -146,12 +146,20 @@ $( document ).ready(function() {
                            }
                            client.emit('sendRoom',sendData);
                        });
-                       /*if(data['speech'] != undefined){
-                           data['speech'].forEach(function(text){
-                               alert(data['user']);
-                                $('#c-'+data['room']).append('<li><strong>'+data['user']+': </strong>'+text+'</li>');
+                       // Si el chat, tiene textos ya escritos, entonces los
+                       // muestro al usuario que ha pedido los texto
+                       if(data['speech'] != undefined){
+                           data['speech'].forEach(function(message){
+                               //alert(message['user']);
+                                $('#c-'+data['room']).append(
+                                        '<li id="text-chat"><strong>'+
+                                        message['user']+
+                                        ': </strong>'+
+                                        message['text']+
+                                        '<span class="right" id="list-options"><a href="#">save text</a></span></li>'
+                                        );
                            });
-                       }*/
+                       }
                    },
                    'html');
             
